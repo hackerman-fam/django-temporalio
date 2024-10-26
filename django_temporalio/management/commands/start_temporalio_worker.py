@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
     async def start_dev_workers(self):
         client = await init_client()
-        tasks = []
+        tasks = list()
         queues = []
 
         for queue_name, item in get_queue_registry().items():
@@ -50,7 +50,7 @@ class Command(BaseCommand):
             f"Starting dev Temporal.io workers for queues: {', '.join(queues)}\n"
             f"(press ctrl-c to stop)...",
         )
-        await asyncio.wait(*tasks)
+        await asyncio.wait(tasks)
 
     async def start_worker(self, name):
         worker_config = settings.WORKER_CONFIGS[name]
