@@ -8,7 +8,6 @@ from django_temporalio.utils import autodiscover_modules
 
 
 class ScheduleRegistry:
-    _registry: dict[str, Schedule]
 
     class AlreadyRegistered(Exception):
         pass
@@ -35,10 +34,7 @@ class ScheduleRegistry:
 
 
 class QueueRegistry:
-    module_name: str
-    check_attr: str
-    _registry: dict[str, list]
-    _registered_object_ids: set
+
 
     class MissingTemporalDecorator(Exception):
         pass
