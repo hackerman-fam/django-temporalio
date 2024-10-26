@@ -50,7 +50,7 @@ class Command(BaseCommand):
             f"Starting dev Temporal.io workers for queues: {', '.join(queues)}\n"
             f"(press ctrl-c to stop)...",
         )
-        await asyncio.gather(*tasks)
+        await asyncio.wait(*tasks)
 
     async def start_worker(self, name):
         worker_config = settings.WORKER_CONFIGS[name]
@@ -86,10 +86,15 @@ class Command(BaseCommand):
             sys.exit(2)
 
         with contextlib.suppress(KeyboardInterrupt):
-            asyncio.run(
-                (
-                    self.start_dev_workers()
-                    if run_all
-                    else self.start_worker(worker_name)
-                ),
-            )
+            loop = asyncio.get_event_loop()
+
+            # asyncio.run(
+            #     (
+            #         self.start_dev_workers()
+            #         if run_all
+            #         else self.start_worker(worker_name)
+            #     ),
+            # )
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self.start_dev_workers())
+            loop.close()
