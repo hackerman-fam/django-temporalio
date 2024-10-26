@@ -95,7 +95,8 @@ class Command(BaseCommand):
             #         else self.start_worker(worker_name)
             #     ),
             # )
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            # loop = asyncio.new_event_loop()
+            # asyncio.set_event_loop(loop)
+            loop = asyncio.get_running_loop()
             loop.run_until_complete(self.start_dev_workers())
             loop.close()
