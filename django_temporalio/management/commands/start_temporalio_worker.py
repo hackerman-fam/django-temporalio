@@ -31,26 +31,6 @@ class Command(BaseCommand):
             ),
         )
 
-    async def start_dev_workers(self):
-        client = await init_client()
-        tasks = list()
-        queues = []
-
-        for queue_name, item in get_queue_registry().items():
-            worker = Worker(
-                client,
-                task_queue=queue_name,
-                workflows=item.workflows,
-                activities=item.activities,
-            )
-            tasks.append(worker.run())
-            queues.append(queue_name)
-
-        self.stdout.write(
-            f"Starting dev Temporal.io workers for queues: {', '.join(queues)}\n"
-            f"(press ctrl-c to stop)...",
-        )
-        await asyncio.wait(tasks)
 
     async def start_worker(self, name):
         worker_config = settings.WORKER_CONFIGS[name]
@@ -77,6 +57,27 @@ class Command(BaseCommand):
         )
         await worker.run()
 
+    async def start_dev_workers(self):
+        client = await init_client()
+        tasks = list()
+        queues = []
+
+        for queue_name, item in get_queue_registry().items():
+            worker = Worker(
+                client,
+                task_queue=queue_name,
+                workflows=item.workflows,
+                activities=item.activities,
+            )
+            tasks.append(worker.run())
+            queues.append(queue_name)
+
+        self.stdout.write(
+            f"Starting dev Temporal.io workers for queues: {', '.join(queues)}\n"
+            f"(press ctrl-c to stop)...",
+        )
+        await asyncio.wait(tasks)
+
     def handle(self, *args, **options):
         worker_name = options["worker_name"]
         run_all = options["all"]
@@ -86,8 +87,6 @@ class Command(BaseCommand):
             sys.exit(2)
 
         with contextlib.suppress(KeyboardInterrupt):
-            loop = asyncio.get_event_loop()
-
             # asyncio.run(
             #     (
             #         self.start_dev_workers()
@@ -95,8 +94,4 @@ class Command(BaseCommand):
             #         else self.start_worker(worker_name)
             #     ),
             # )
-            # loop = asyncio.new_event_loop()
-            # asyncio.set_event_loop(loop)
-            loop = asyncio.get_running_loop()
-            loop.run_until_complete(self.start_dev_workers())
-            loop.close()
+            asyncio.create_task(self.start_dev_workers())
